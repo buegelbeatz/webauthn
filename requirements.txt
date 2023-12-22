@@ -1,0 +1,10 @@
+fastapi
+# fastapi-sessions
+starlette
+jinja2
+webauthn
+# python-multipart
+pyjwt
+qrcode
+Pillow
+uvicorn[standard]
