@@ -5,8 +5,8 @@ from PIL import Image
 
 class Qr:
 
-    def __init__(self,protocol,domain):
-        self.url = f"{protocol}://{domain}/invite"
+    def __init__(self,protocol,domain,path):
+        self.url = f"{protocol}://{domain}{path}"
         self.qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,

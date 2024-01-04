@@ -1,8 +1,10 @@
 import os
-from tools import generate_random_password
+import string
+import random
+
 
 COOKIE_NAME = 'webauthn'
-SECRET = generate_random_password()
+SECRET = ''.join(random.choice(string.ascii_letters) for _ in range(8))
 DATA_DIR = os.environ['DATA'] if 'DATA' in os.environ.keys() else './.data'
 if 'SECRET' in os.environ.keys():
     SECRET = os.environ['SECRET']

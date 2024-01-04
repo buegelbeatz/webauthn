@@ -52,7 +52,7 @@ run: start-ngrok install fetch-ngrok-domain
 	@echo "${NGROK_DOMAIN}"
 	@$(eval PWD := $(shell pwd))
 	@. venv/bin/activate && cd src && \
-		open https://${NGROK_DOMAIN}/admin && \
+		open https://${NGROK_DOMAIN}/auth/admin && \
 		DOMAIN=${NGROK_DOMAIN} SECRET=${NGROK_DOMAIN} DATA=${PWD}/${DATA_DIR} uvicorn main:app --host 0.0.0.0 --reload
 
 # Run tests

@@ -34,7 +34,7 @@ const _credentials = (id,clientDataJSON,signature,authenticatorData, attestation
 
 async function registerWebAuthn(id) {
     try {
-        const data = await _callWebAuthn('Registration','/register/challenge',{id});
+        const data = await _callWebAuthn('Registration','/auth/register/challenge',{id});
         console.log('registerWebAuthn.challenge', data)
         data.user.id = Uint8Array.from(data.user.id, c => c.charCodeAt(0));
         const publicKey = _public_key(data.challenge, data.timeout)
@@ -47,7 +47,7 @@ async function registerWebAuthn(id) {
         const credential_send = _credentials(credential.id, clientDataJSON, null, null, attestationObject, null);
         credential_send['user'] = data['user']['name'];
         console.log('registerWebAuthn.create', credential_send)
-        return await _finalize('Finalize registration','/register/finalize',credential_send);
+        return await _finalize('Finalize registration','/auth/register/finalize',credential_send);
     } catch (error) {
         console.error('Error during registration:', error);
     }
@@ -56,7 +56,7 @@ async function registerWebAuthn(id) {
 
 async function loginWebAuthn() {
     try {
-        const data = await _callWebAuthn('Login','/login/challenge',null);
+        const data = await _callWebAuthn('Login','/auth/login/challenge',null);
         console.log('loginWebAuthn.challenge', data)
         const publicKey = _public_key(data.challenge, data.timeout)
         console.log('publicKey', publicKey)
@@ -64,7 +64,7 @@ async function loginWebAuthn() {
         const {authenticatorData, signature, userHandle, clientDataJSON} = credential.response
         const credential_send = _credentials(credential.id, clientDataJSON, signature, authenticatorData, null, userHandle);
         console.log('loginWebAuthn.get', credential_send, data.challenge)
-        return await _finalize('Finalize login','/login/finalize',credential_send, data.challenge);
+        return await _finalize('Finalize login','/auth/login/finalize',credential_send, data.challenge);
     } catch (error) {
         console.error('Error during login:', error);
     }

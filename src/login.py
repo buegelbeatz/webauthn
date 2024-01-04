@@ -1,22 +1,19 @@
 from typing import Any
+import json
 from fastapi import APIRouter, Request, Response, HTTPException, Depends, Body
-from starlette.responses import FileResponse
+# from starlette.responses import FileResponse
+from fastapi.templating import Jinja2Templates
 import webauthn
 from webauthn.helpers.structs import PublicKeyCredentialDescriptor
-# from webauthn.helpers.struct import PublicKeyCredentialDescriptor
-import json
 
-# import tools
 import environment
 import dependencies
-from helpers import set_session, set_authorization
-
-from auth.helpers import get_verification_dictionary, get_encoded_from_b64_decoded, get_existing_credentials
+from helpers import set_session, set_authorization, get_verification_dictionary, get_encoded_from_b64_decoded, get_existing_credentials
 
 
 router = APIRouter(
     prefix="/login",
-    tags=["login","webauthn"],
+    tags=["login","auth","webauthn"],
 )
 
 
@@ -35,7 +32,7 @@ async def login_finalize(
         webauthn.verify_authentication_response(
             **get_verification_dictionary(credential),
             credential_public_key=get_encoded_from_b64_decoded(saved_credential['public_key']),
-            credential_current_sign_count=0, 
+            credential_current_sign_count=0,
             require_user_verification=True
         )
         set_authorization(response, saved_credential['user'], credential['id'])
@@ -48,7 +45,6 @@ async def login_finalize(
         print(error)
         response.delete_cookie(key=environment.COOKIE_NAME)
     return json.dumps(_result)
-
 
 
 @router.post("/challenge")
@@ -71,15 +67,10 @@ async def login_challenge(
 
 @router.get("/")
 async def login(
-        rd: str = '',
-        session=Depends(dependencies.get_session)):
-    # TODO: switch to templating
-    response = FileResponse('webauthn.html')
-    if rd:
-        print(f"found redirect: {rd}")
-        _session = session if session else {}
-        set_session(response, {**_session, **{'rd':rd}})
-    return response
+            request: Request,
+            rd: str = '',
+            templates: Jinja2Templates = Depends(dependencies.get_templates)):
+    return templates.TemplateResponse("login.html",{"rd":rd,"request": request})
 
 
 __all__ = ['router']

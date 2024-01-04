@@ -1,22 +1,18 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Registration
+    Invite
 {% endblock %}
 
 {% block heading %}
-    Registration
+    Invite
 {% endblock %}
 
 {% block content %}
-<script src="/static/webauthn.js"></script>
-<script src="/static/deligate.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', async () => {
-            const key = window.location.pathname.replace(/^.*\//,'')
-            result = await registerWebAuthn(key);
-            deligate(result);
 
-    });
-</script>
+<div class="card">
+    <div class="card-body">
+        <img src="/auth/invite/qr/{{key}}"/>
+    </div>
+  </div>
 {% endblock %}

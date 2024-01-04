@@ -3,7 +3,7 @@ fastapi
 starlette
 jinja2
 webauthn
-# python-multipart
+python-multipart
 pyjwt
 qrcode
 Pillow

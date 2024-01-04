@@ -9,20 +9,24 @@
         <title>{% block title %}Simple Blog{% endblock %}</title>
     </head>
     <body>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-4 order-lg-1">
-                    <!-- Left column content -->
-                </div>
-                <div class="col-lg-4 order-lg-2">
-                    <h2>{% block heading %}Simple Blog{% endblock %}</h2>
-    
-                    {% block content %}Content{% endblock %}
-            
-                    {% include "footer.html" %}
-                </div>
-                <div class="col-lg-4 order-lg-3">
-                    <!-- Right column content -->
+        <nav class="navbar navbar-dark bg-primary">
+            <span class="navbar-brand mb-0 h1">&emsp;{% block heading %}Simple Blog{% endblock %}</span>
+        </nav>
+        <div>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-4 order-lg-1">
+                        <!-- Left column content -->
+                    </div>
+                    <div class="col-lg-4 order-lg-2">
+        
+                        {% block content %}Content{% endblock %}
+                
+                        {% include "footer.html" %}
+                    </div>
+                    <div class="col-lg-4 order-lg-3">
+                        <!-- Right column content -->
+                    </div>
                 </div>
             </div>
         </div>

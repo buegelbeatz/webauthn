@@ -1,21 +1,18 @@
 import logging
 
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, APIRouter
 from fastapi.staticfiles import StaticFiles
-# from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.templating import Jinja2Templates
 
-# from starlette.responses import FileResponse
-
-# import register
-# import login
 import invite
-import dependencies
-# import admin
+import admin
+import login
+import register
 # import test
 
-import auth
+# import auth
+import dependencies
 
 logger = logging.getLogger("uvicorn")
 logger.setLevel(logging.getLevelName(logging.DEBUG))
@@ -36,16 +33,16 @@ async def custom_exception_handler(
          "detail": detail,
          "status_code": status_code})
 
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+router = APIRouter(
+    prefix="/auth",
+    tags=["register","login","admin","invite", "webauthn"],
+)
 
-# app.include_router(register.router)
-app.include_router(auth.login.router)
-app.include_router(invite.router)
-# app.include_router(admin.router)
-# app.include_router(test.router)
+router.include_router(invite.router)
+router.include_router(admin.router)
+router.include_router(register.router)
+router.include_router(login.router)
 
-# @app.get("/webauthn.js")
-# async def webauthn_js():
-#     return FileResponse('webauthn.js')
+app.include_router(router)
