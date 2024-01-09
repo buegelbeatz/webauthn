@@ -162,3 +162,5 @@ cython_debug/
 #.idea/
 
 __*
+src/static/bootstrap.*
+*-secret.yaml

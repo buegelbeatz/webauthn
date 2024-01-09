@@ -3,6 +3,8 @@
 from fastapi import  Request, HTTPException
 from fastapi.templating import Jinja2Templates
 import jwt
+import os
+import yaml
 
 import environment
 from store import Store
@@ -14,7 +16,7 @@ def get_session(request: Request):
         if token:
             payload = jwt.decode(token.encode(), f"{environment.SECRET}_session", algorithms=["HS256"])
         return payload
-    except Exception:
+    except Exception: # pylint: disable=W0718
         pass
     return None
 
@@ -26,7 +28,7 @@ def get_store() -> Store:
 def get_templates() -> Jinja2Templates:
     return Jinja2Templates(directory="templates")
 
-def get_user_str(request: Request) -> str:
+def get_user_payload(request: Request):
     try:
         token = None
         authorization = request.headers.get('authorization')
@@ -36,24 +38,58 @@ def get_user_str(request: Request) -> str:
             token = request.cookies.get(environment.COOKIE_NAME)
         if token:
             payload = jwt.decode(token.encode(), environment.SECRET, algorithms=["HS256"])
-        return payload['user']
-    except Exception:
+        return payload
+    except Exception: # pylint: disable=W0718
         pass
     return ''
 
 
+def get_settings():
+    path = ""
+    settings = None
+    try:
+        if os.path.exists(f"{environment.DATA_DIR}/settings.yaml"):
+            path = f"{environment.DATA_DIR}/settings.yaml"
+        if os.path.exists("/settings.yaml"):
+            path = f"{environment.DATA_DIR}/settings.yaml"
+        if path:
+            with open(path, 'r', encoding='utf-8') as file:
+                settings = yaml.safe_load(file)
+    except Exception: # pylint: disable=W0718
+        print(f"""
+####################################################################
+MISSING settings.yaml file! Please mount this to '/settings.yaml' 
+if you are in kubernetes context or copy it over to your 
+'{environment.DATA}' folder. Should look like:
+
+users:
+  - john.doe@example.com
+  - mario.rossi@example.it
+  - heinz.mustermann@example.de
+permissions:
+  - key: test1
+    url: https://test1.example.org
+  - key: test2
+    url: https://test2.example.org
+    
+####################################################################
+""")
+        raise HTTPException(status_code=503, detail="If you are admin please check the server side console output!")
+    return settings
+
+
 def get_admin_bool(request: Request) -> bool:
-    _user = get_user_str(request)
-    if _user != 'admin':
+    _payload = get_user_payload(request)
+    if _payload and _payload['user'] != 'admin':
         return False
     return True
 
 
-def get_user(request: Request) -> str:
-    _user = get_user_str(request)
-    if not _user:
+def get_user(request: Request):
+    _payload = get_user_payload(request)
+    if not _payload or _payload['user'] == '':
         raise HTTPException(status_code=401, detail="you need to authenticate", headers={"WWW-Authenticate": "Bearer"}) 
-    return _user
+    return _payload
 
 
 def get_admin(request: Request) -> bool:
@@ -61,4 +97,4 @@ def get_admin(request: Request) -> bool:
         raise HTTPException(status_code=403, detail="access is only allowed for admin")
     return True
 
-__all__ = ['get_store', 'get_session', 'get_templates', 'get_user_str', 'get_admin_bool', 'get_user', 'get_admin']
+__all__ = ['get_store', 'get_session', 'get_templates', 'get_user_payload', 'get_admin_bool', 'get_user', 'get_admin', 'get_settings']

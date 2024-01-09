@@ -2,47 +2,64 @@
 
 {% block title %}Admin{% endblock %}
 
+{% block heading %}
+Admin
+{% endblock %}
+
 {% block content %}
-    <div class="card" style="margin:10px;padding:10px;">
+    <div class="card admin" >
         <form action="/auth/admin/add" method="post">
             <div class="form-row">
-                <div class="form-group col-md-4">
+                <div class="form-group ">
                     <input type="hidden" name="type" id="type" value="invite" />
                     <label for="disabled_type">type</label>
                     <input class="form-control" type="text" name="disabled_type" id="disabled_type" value="invite" readonly />
                 </div>
-                <div class="form-group col-md-4">
+                <div class="form-group ">
                     <label for="user">user</label>
-                    <input class="form-control" type="email" name="user" id="user" value="" placeholder="john.doe@example.org" />
+                    {% if select_users -%}
+                        <select class="form-control" id="user" name="user">
+                            {% for select_user in select_users -%}
+                                <option>{{select_user}}</option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <input class="form-control" type="email" name="user" id="user" value="" placeholder="john.doe@example.org" />
+                    {% endif %}
                 </div>
-                <div class="form-group col-md-4">
-                    <label for="permission">permissions</label>
-                    <select class="form-control" id="permissions" name="permissions">
-                        <option>test</option>
-                    </select>
+                <div class="form-group ">
+                    <h6>permissions</h6>
+                        <input type="hidden" name="permissions" id="permissions" value="empty" />
+                        {% for select_permission in select_permissions -%}
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="permissions" value= "{{select_permission}}" id="permissions">
+                            <label class="form-check-label" for="flexSwitchCheckDefault">{{select_permission}}</label>
+                        </div>
+                        {% endfor %}
                 </div>
                 <br />
-                <button type="submit" style="width:100%" class="btn btn-secondary btn-block">Add</button>
+                <button type="submit" style="width:100%" class="btn btn-success btn-block">Add</button>
             </div>
         </form>
     </div>
+    <hr style="border-top: 15px solid #8c8b8b;"/>
 
     {% for permission in permissions -%}
         {% if permission['user'] != 'admin' -%}
-            <div class="card" style="margin:10px;padding:10px;">
+            <div class="card admin">
                 <form action="/auth/admin/delete" method="post">
                     <div class="form-row">
-                        <div class="form-group col-md-4">
+                        <div class="form-group ">
                             <input type="hidden" name="type" id="type" value="{{permission['type']}}" />
                             <label for="disabled_type">type</label>
                             <input class="form-control" type="text" name="disabled_type" id="disabled_type" value="{{permission['type']}}" readonly />
                         </div>
-                        <div class="form-group col-md-4">
+                        <div class="form-group ">
                             <input type="hidden" name="user" id="user" value="{{permission['user']}}" />
                             <label for="disabled_user">user</label>
                             <input class="form-control" type="text" name="disabled_user" id="disabled_user" value="{{permission['user']}}" readonly />
                         </div>
-                        <div class="form-group col-md-4">
+                        <div class="form-group ">
                             <input type="hidden" name="id" id="id" value="{{permission['id']}}" />
                             <label for="disabled_id">id</label>
                             <input class="form-control" type="text" name="disabled_id" id="disabled_id" value="{{permission['id']}}" readonly />
@@ -53,9 +70,34 @@
                             <br />
                         {% endif %}
                         <br />
-                        <button type="submit" style="width:100%" class="btn btn-secondary btn-block">Delete</button>
+                        <button type="submit" style="width:100%" class="btn btn-danger btn-block">Delete</button>
                     </div>
                 </form>
+                {% if permission['type'] == 'credential' -%}
+                <form action="/auth/admin/edit" method="post">
+                    <div class="form-row">
+                        <div class="form-group ">
+                            <input type="hidden" name="id" id="id" value="{{permission['id']}}" />
+                            <input type="hidden" name="permissions" id="permissions" value="empty" />
+                        </div>
+                        <div class="form-group admin">
+                            <h6>permissions</h6>
+                                {% for select_permission in select_permissions -%}
+                                <div class="form-check form-switch">
+                                    {% if select_permission in permission['permissions'] -%}
+                                        <input class="form-check-input" type="checkbox" name="permissions" value= "{{select_permission}}" id="permissions" checked>
+                                    {% else %}
+                                        <input class="form-check-input" type="checkbox" name="permissions" value= "{{select_permission}}" id="permissions">
+                                    {% endif %}
+                                    <label class="form-check-label" for="flexSwitchCheckDefault">{{select_permission}}</label>
+                                    </div>
+                                {% endfor %}
+                        </div>
+                        <br />
+                        <button type="submit" style="width:100%" class="btn btn-success btn-block">Save</button>
+                    </div>
+                </form>
+                {% endif %}
             </div>
         {% endif %}
     {% endfor %}

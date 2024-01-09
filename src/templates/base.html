@@ -7,8 +7,15 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="/static/bootstrap.css" rel="stylesheet" crossorigin="anonymous">
         <title>{% block title %}Simple Blog{% endblock %}</title>
+        <style>
+            .admin {
+                margin:10px;
+                padding:10px;
+            }
+        </style>
     </head>
     <body>
+
         <nav class="navbar navbar-dark bg-primary">
             <span class="navbar-brand mb-0 h1">&emsp;{% block heading %}Simple Blog{% endblock %}</span>
         </nav>

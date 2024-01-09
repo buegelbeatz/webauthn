@@ -47,7 +47,7 @@ class Store:
         """deleting a specific file via key"""
         try:
             os.remove(self._filepath(key))
-        except Exception: # # pylint: disable=W0718
+        except Exception: # pylint: disable=W0718
             pass
 
     def count(self) -> int:

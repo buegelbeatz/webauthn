@@ -1,6 +1,6 @@
 import random
 import string
-from fastapi import  Response
+from fastapi import  Response, Request
 import jwt
 import re
 import json
@@ -37,14 +37,33 @@ def get_existing_credentials(credentials):
 def generate_random_password():
     return ''.join(random.choice(string.ascii_letters) for _ in range(8))
 
-def set_session(response: Response, payload):
-    token = jwt.encode(payload, f"{environment.SECRET}_session", algorithm="HS256")
-    response.set_cookie(key=f"{environment.COOKIE_NAME}_session", value=token)
+def generate_random_pin():
+    random_pin = random.randint(0, 9999)
+    formatted_pin = f'{random_pin:04}'
+    return formatted_pin
 
-def set_authorization(response: Response, user_name, credential_id):
+def _set_cookie(request: Request, response: Response, key, value):
+    _domain = re.sub(r"^.*(\.[^\.]+\.[^\.]+)$",r"\1",request.headers.get('host'))
+    response.set_cookie(key=key, value=value, domain=_domain, secure=True, httponly=True, samesite='none')
+
+def set_session(request: Request, response: Response, payload):
+    token = jwt.encode(payload, f"{environment.SECRET}_session", algorithm="HS256")
+    _set_cookie(request, response, f"{environment.COOKIE_NAME}_session", token)
+
+# TODO: Maybe more nice to bring all the authorization stuff together 
+def set_authorization(request: Request,response: Response, user_name, credential_id):
     token = jwt.encode({"id": credential_id, "user": user_name}, environment.SECRET, algorithm="HS256")
-    response.set_cookie(key=environment.COOKIE_NAME, value=token)
+    _set_cookie(request, response, f"{environment.COOKIE_NAME}", token)
     response.headers['X-User'] = user_name
     response.headers['Bearer'] = token
 
-__all__ = ['set_session', 'set_authorization', 'generate_random_password', 'get_nice_string', 'get_client_data_json', 'get_b64_decoded', 'get_encoded_from_b64_decoded', 'get_verification_dictionary', 'get_existing_credentials']
+__all__ = ['set_session',
+           'set_authorization',
+           'generate_random_pin',
+           'generate_random_password',
+           'get_nice_string',
+           'get_client_data_json',
+           'get_b64_decoded',
+           'get_encoded_from_b64_decoded',
+           'get_verification_dictionary',
+           'get_existing_credentials']

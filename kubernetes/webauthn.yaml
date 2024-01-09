@@ -1,0 +1,96 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: webauthn
+  labels:
+    name: webauthn
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: webauthn
+  namespace: webauthn
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: webauthn
+  name: webauthn
+  namespace: webauthn
+spec:
+  ports:
+    - name: webauthn
+      port: 8000
+      protocol: TCP
+      targetPort: 8000
+  selector:
+    k8s-app: webauthn
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: webauthn
+  namespace: webauthn
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "managed-nfs-storage"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: webauthn
+  name: webauthn
+  namespace: webauthn
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      k8s-app: webauthn
+  template:
+    metadata:
+      labels:
+        k8s-app: webauthn
+    spec:
+      serviceAccountName: webauthn
+      volumes:
+          - name: webauthn
+            persistentVolumeClaim:
+              claimName: webauthn
+      containers:
+
+
+        - name: webauthn
+          envFrom:
+            - secretRef:
+                name: webauthn-secret
+          volumeMounts:
+            - name: webauthn
+              mountPath: /.data
+          image: buegelbeatz/webauthn:arm64
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 8000
+            initialDelaySeconds: 10
+            timeoutSeconds: 10

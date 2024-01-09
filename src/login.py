@@ -8,7 +8,7 @@ from webauthn.helpers.structs import PublicKeyCredentialDescriptor
 
 import environment
 import dependencies
-from helpers import set_session, set_authorization, get_verification_dictionary, get_encoded_from_b64_decoded, get_existing_credentials
+from helpers import set_authorization, get_verification_dictionary, get_encoded_from_b64_decoded, get_existing_credentials
 
 
 router = APIRouter(
@@ -19,6 +19,7 @@ router = APIRouter(
 
 @router.post('/finalize')
 async def login_finalize(
+        request: Request,
         response: Response, 
         payload: Any = Body(None),
         store=Depends(dependencies.get_store), 
@@ -35,13 +36,13 @@ async def login_finalize(
             credential_current_sign_count=0,
             require_user_verification=True
         )
-        set_authorization(response, saved_credential['user'], credential['id'])
+        set_authorization(request, response, saved_credential['user'], credential['id'])
         if session and session['rd']:
             _result['redirect'] = session['rd']
         if saved_credential['user'] == 'admin':
             _result['admin'] = 1
         _result['verified'] = 1
-    except Exception as error:
+    except Exception as error: # pylint: disable=W0718
         print(error)
         response.delete_cookie(key=environment.COOKIE_NAME)
     return json.dumps(_result)
@@ -60,7 +61,7 @@ async def login_challenge(
             allow_credentials=_credentials))
         print('_challenge', _challenge)
         return _challenge
-    except Exception as error:
+    except Exception as error: # pylint: disable=W0718
         print(error)
     raise HTTPException(status_code=500, detail="login challenge failed")
 

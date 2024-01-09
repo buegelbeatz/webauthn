@@ -13,9 +13,13 @@
 <script src="/static/deligate.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
-            const key = window.location.pathname.replace(/^.*\//,'')
-            result = await registerWebAuthn(key);
-            deligate(result);
+            result = await registerWebAuthn('{{key}}');
+            if(result){
+                result['redirect'] = '{{rd}}';
+                deligate(result);
+            }else{
+                window.location="/auth/login?rd=" + encodeURIComponent('{{rd}}')
+            }
     });
 </script>
 {% endblock %}

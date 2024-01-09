@@ -1,6 +1,6 @@
 const deligate = (result) => {
     if(result === false){
-        window.location = '/'
+        window.location = '/auth/error'
     }else{
         if(result['redirect']){
             window.location = result['redirect']
@@ -8,7 +8,7 @@ const deligate = (result) => {
             if(result['admin'] && result['admin'] == 1){
                 window.location = '/auth/admin';
             }else{
-                window.location = '/done'
+                window.location = '/auth/done'
             }
         }
     }

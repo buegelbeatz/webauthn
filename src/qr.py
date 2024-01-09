@@ -14,8 +14,8 @@ class Qr:
             border=4,
         )
 
-    def create(self,key):
-        self.qr.add_data(f"{self.url}/{key}")
+    def create(self):
+        self.qr.add_data(f"{self.url}")
         self.qr.make(fit=True)
         img = self.qr.make_image(fill_color='black', back_color='white')
         _bytes = BytesIO()
